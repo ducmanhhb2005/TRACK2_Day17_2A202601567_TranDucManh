@@ -45,6 +45,7 @@ with ranked as (
             order by event_time desc, cdc_seq desc
         ) as _rn
     from {{ source('bronze', 'bronze_tickets_cdc') }}
+    where {{ normalize_priority('priority_raw') }} is not null
 
 ),
 
