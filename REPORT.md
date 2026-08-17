@@ -26,7 +26,7 @@ Kết quả cuối sau ba lượt chạy: `gold_training_set` 12.480 dòng, `gol
 
 | | |
 |---|---|
-| **Triệu chứng** | Bảng ổn định nhưng chỉ có 8.645 dòng, thiếu 455 dòng; phần thiếu tập trung ở các ngày cũ. |
+| **Triệu chứng** | Bảng ổn định nhưng chỉ có 8.645 dòng, thiếu 455 dòng so với kỳ vọng 9.100. |
 | **P99 độ trễ đo được** | **2,7258 ngày**. P50 là 0,1281 ngày, P95 là 1,8137 ngày, độ trễ lớn nhất là 2,9447 ngày; khoảng 5,05% sự kiện đến muộn hơn một ngày. |
 | **Lookback đã chọn** | **3 ngày**, bằng cách làm tròn P99 lên một ngày đầy đủ. |
 | **Nguyên nhân** | Điều kiện chỉ lấy `event_date` lớn hơn ngày lớn nhất trong đích. Ví dụ event ngày 12/08 tới kho ngày 15/08 sẽ không lọt qua điều kiện và bị bỏ quên. |
@@ -43,9 +43,9 @@ Tôi chọn P99 vì `max` dễ bị kéo lệch bởi một vài outlier. Window
 | **Nguyên nhân** | Source đổi một phần từ số sang nhãn chữ. `try_cast` biến nhãn hợp lệ như `urgent` thành NULL nhưng vẫn nhận 0, 5, -1 vì chúng là số nguyên. |
 | **Ba nhóm giá trị** | Các chuỗi số `1..4` được giữ nguyên; `urgent/high/medium/low` được map lần lượt về `1/2/3/4`; các giá trị `P1`, `P2`, `unknown`, `0`, `5`, `-1`, chuỗi rỗng và NULL được xem là lỗi và đưa vào quarantine. |
 | **Cách khắc phục** | Viết lại macro bằng `CASE`; lọc dòng lỗi trước `row_number`; dùng cùng macro cho quarantine. Bật contract và thêm test `not_null`, `accepted_values [1,2,3,4]`. |
-| **Bằng chứng** | `quarantine_tickets` có đúng 312 dòng; `priority` trong Silver chỉ còn 1..4 và không NULL; `dbt test` tăng từ 9 lên 11 test và đạt 11/11. `silver_tickets` vẫn đủ 12.480 ticket. |
+| **Bằng chứng** | `quarantine_tickets` có đúng 312 dòng; `priority` trong Silver chỉ còn 1..4 và không NULL; `dbt test` tăng từ 9 lên 11 test và đạt 11/11. Bảng Gold vẫn cho đúng 12.480 training rows. |
 
-Tôi giữ dữ liệu thô ở Bronze để còn bằng chứng điều tra, còn chuẩn hóa và chặn lỗi ở Silver. Không nên để 312 dòng lỗi làm dừng hơn 130.000 event và 31.200 document chunk hợp lệ; chúng được tách vào quarantine để xử lý sau, còn contract và test ngăn lỗi đi tiếp xuống Gold.
+Tôi giữ dữ liệu thô ở Bronze để còn bằng chứng điều tra, còn chuẩn hóa và chặn lỗi ở Silver. Không nên để 312 dòng lỗi làm dừng toàn bộ dữ liệu hợp lệ; chúng được tách vào quarantine để xử lý sau, còn contract và test ngăn lỗi đi tiếp xuống Gold.
 
 ## 4. Tổng kết
 
